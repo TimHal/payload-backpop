@@ -27,44 +27,37 @@ export const backpopulateHookFactory = ({ target_slug, target_field }: hookArgs)
         if (operation === 'create' || operation === 'update') {
             // check if the target collection has a relationship field to self, otherwise create it
 
-            // add self to backpopulated relationship
-            console.log(data);
-            console.log(originalDoc);
-            console.log(value);
+            const allTargetDocuments = await payload.find({
+                collection: target_slug,
+                overrideAccess: true,
+                depth: 1
+            });
 
-            for(let id of value) {
-                console.log(target_field);
-                const targetDoc = await payload.findByID({
+            for (let targetDocument of allTargetDocuments.docs) {
+                let updatedReferenceIds;
+                if ((value as [string]).includes(targetDocument.id)) {
+                    // this is one of the referenced documents, we want to append ourselves to the field, but only once
+                    const prevReferencedIds = targetDocument[target_field].map((doc) => doc.id);
+                    updatedReferenceIds = Array.from(new Set([...prevReferencedIds, originalDoc.id]));
+                    
+                } else {
+                    // this document is not referenced (any more) make sure the originalDoc is not included in the target field
+                    const prevReferencedIds = targetDocument[target_field].map((doc) => doc.id);
+                    updatedReferenceIds = Array.from(new Set(prevReferencedIds)).filter(id => id && id !== originalDoc.id);
+                }
+                await payload.update({
                     collection: target_slug,
-                    id: id,
-                })
-                console.log('prev_refs');
-                console.log(targetDoc[target_field]);
-
-                const res = await payload.update({
-                    collection: target_slug,
-                    id: id,
+                    id: targetDocument.id,
                     overrideAccess: true,
                     data: {
-                        [target_field]: [...targetDoc[target_field], originalDoc.id]
+                        [target_field]: updatedReferenceIds
                     }
-                });
-                console.log(res);
-                console.log(res[target_field]);
+                })
             }
         }
     
-        // TODO: add a cleanup hook on document level
-
-        if (operation === 'delete') {
-            console.log(`Removed relationship ${data} \n ${value}`);
-        }
-
         return value;
     }
-
-    // make sure the document gets updated with the new field
-
 
     return hook;   
 }

@@ -2,7 +2,6 @@ import { Config } from "payload/config";
 import { Field } from "payload/types";
 import backpopulate, {
   backpopulateHookFactory,
-  marker,
   markerHook,
 } from "./backpopulate.hook";
 import payload from "payload";
@@ -13,25 +12,20 @@ const backpopulatedRelationships = (incomingConfig: Config) => {
     for (let field of collection.fields) {
         
       if (field.type === "relationship") {
-        if (Object.hasOwn(field, "hooks")) {
+        if (field.hasOwnProperty("hooks")) {
           const hasMarker = field.hooks.afterChange.find(
             (hook) => hook === markerHook
           );
-          console.log(markerHook);
           if (hasMarker) {
-            console.log(
-              `Found marker hook for ${collection.slug}.${field.name}`
-            );
-
             // get the target collection
             // @ts-ignore es-lint-disable-line
             const targetCollection = incomingConfig.collections.find(
               (collection) => collection.slug === field.relationTo
             );
-            console.log(targetCollection);
+            const targetFieldName = `${collection.slug}_${field.name}_backpopulated`;
             // create a readonly hasMany relationship field on the target collection
             const backpopulatedField: Field = {
-              name: `${collection.slug}_backpopulated`,
+              name: targetFieldName,
               type: "relationship",
               relationTo: collection.slug,
               hasMany: true,
@@ -58,10 +52,10 @@ const backpopulatedRelationships = (incomingConfig: Config) => {
             );
 
             // the source collection also needs an afterDeleteHook to remove itself from the backpopulated fields on the target collection
-            if (! Object.hasOwn(collection, "hooks")) {
+            if (! collection.hasOwnProperty("hooks")) {
                 collection.hooks = {};
             }
-            if (! Object.hasOwn(collection.hooks, "afterDelete")) {
+            if (! collection.hooks.hasOwnProperty("afterDelete")) {
                 collection.hooks.afterDelete = [];
             }
 
@@ -70,26 +64,21 @@ const backpopulatedRelationships = (incomingConfig: Config) => {
             const cleanupHook = async ({ req, id, doc }) => {
               // query all documents which have a relationship to this document
               
-              console.log(doc);
               for (let targetId of doc[field.name]) {
-                console.log(`cleaning target ${targetId}`);
                   const targetDocument = await payload.findByID({
                       collection: targetCollection.slug,
                       id: targetId,
                     });
-                console.log(`target document`);
-                console.log(targetDocument);
                 // get the current backrefs
-                const prevRefs = targetDocument[backpopulatedField.name];
+                const prevReferences = targetDocument[backpopulatedField.name].map((ref) => ref.id);
+
                 // remove self from backrefs
                 await payload.update({
                   collection: targetCollection.slug,
                   id: targetId,
                   overrideAccess: true,
                   data: {
-                    [backpopulatedField.name]: prevRefs.filter(
-                      (id) => id !== doc.id
-                    ),
+                    [backpopulatedField.name]: prevReferences.filter((id) => id && id !== doc.id)
                   },
                 });
               }
