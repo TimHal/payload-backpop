@@ -4,7 +4,8 @@ import path from 'path';
 import Users from './collections/Users';
 import Foo from './collections/Foo.collection';
 import Bar from './collections/Bar.collection';
-import backpopulatedRelationships from './hooks/plugin';
+import BackpopulatedRelationshipsPlugin from './backpopulated-relationships.plugin';
+import Baz from './collections/Baz.collection';
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -15,6 +16,7 @@ export default buildConfig({
     Users,
     Foo,
     Bar,
+    Baz,
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
@@ -23,6 +25,6 @@ export default buildConfig({
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
   plugins: [
-    backpopulatedRelationships
+    BackpopulatedRelationshipsPlugin
   ]
 });

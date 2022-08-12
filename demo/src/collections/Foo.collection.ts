@@ -1,5 +1,5 @@
 import { CollectionConfig } from "payload/types";
-import backpopulate, { markerHook, marker } from "../hooks/backpopulate.hook";
+import backpopulate from "../hooks/backpopulate.hook";
 
 const Foo: CollectionConfig = {
     slug: 'foo',
@@ -18,8 +18,16 @@ const Foo: CollectionConfig = {
             relationTo: 'bar',
             hasMany: true,
             hooks: {
-                // afterChange: [backpopulate({ target_slug: 'bar', target_field: 'foos' })],
-                afterChange: [markerHook],
+                afterChange: [backpopulate],
+            }
+        },
+        {
+            name: 'bars_or_bazzes',
+            type: 'relationship',
+            relationTo: ['bar', 'baz'],
+            hasMany: true,
+            hooks: {
+                afterChange: [backpopulate],
             }
         }
     ]

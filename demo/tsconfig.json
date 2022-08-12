@@ -16,7 +16,7 @@
   },
   "include": [
     "src"
-  ],
+, "../plugin/hooks/backpopulate.hook.ts", "../plugin/plugin.ts"  ],
   "exclude": [
     "node_modules",
     "dist",
