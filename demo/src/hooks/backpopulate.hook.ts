@@ -63,4 +63,4 @@ export const backpopulateHookFactory = ({
   return hook;
 };
 
-
+export default backpopulateHookFactory;
