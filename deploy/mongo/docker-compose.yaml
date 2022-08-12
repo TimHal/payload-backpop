@@ -5,7 +5,7 @@ services:
     image: mongo:5.0
     container_name: payload_backpop_demo_mongodb
     volumes:
-      - backpop_vol2:/data/db
+      - backpop_vol3:/data/db
     ports:
       - 27017:27017
     environment:
@@ -14,4 +14,4 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=root
 
 volumes:
-  backpop_vol2:
+  backpop_vol3:
