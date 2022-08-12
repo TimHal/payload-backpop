@@ -1,5 +1,6 @@
 import { CollectionConfig } from "payload/types";
-import backpopulate from "../hooks/backpopulate.hook";
+import backpopulate from "../hooks/backpopulate";
+
 
 const Foo: CollectionConfig = {
     slug: 'foo',
