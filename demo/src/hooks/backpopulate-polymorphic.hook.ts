@@ -1,14 +1,17 @@
 import payload from "payload";
 import { FieldHook } from "payload/types";
-import { hookArgs } from "./backpopulate";
+import { polymorphicHookArgs } from "./backpopulate";
 
 export const backpopulatePolymorphicHookFactory = ({
+  primaryCollection,
   targetCollection,
   backpopulatedField,
-}: hookArgs) => {
+}: polymorphicHookArgs) => {
   const hook: FieldHook = async (args) => {
     const { operation, originalDoc, value } = args;
-
+    if(! value || ! value.length) {
+      return value;
+    }
     if (operation === "create" || operation === "update") {
       const allTargetDocuments = await payload.find({
         collection: targetCollection.slug,
@@ -18,10 +21,13 @@ export const backpopulatePolymorphicHookFactory = ({
 
       for (let targetDocument of allTargetDocuments.docs) {
         let updatedReferenceIds;
-
+        console.log(backpopulatedField);
+        console.log(targetDocument);
+        console.log(originalDoc);
         for (let polymorphicEntry of value) {
-          if (polymorphicEntry.relationTo !== originalDoc.collection.slug)
+          if (polymorphicEntry.relationTo !== primaryCollection.slug)
             continue;
+
           if (polymorphicEntry.value === targetDocument.id) {
             // this is one of the referenced documents, we want to append ourselves to the field, but only once
             const prevReferencedIds = targetDocument[
@@ -35,7 +41,7 @@ export const backpopulatePolymorphicHookFactory = ({
             const prevReferencedIds = targetDocument[
               backpopulatedField["name"]
             ].map((doc) => doc.id);
-            updatedReferenceIds = Array.from(new Set(prevReferencedIds)).filter(
+            updatedReferenceIds = Array.from(new Set([... prevReferencedIds])).filter(
               (id) => id && id !== originalDoc.id
             );
           }
