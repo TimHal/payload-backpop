@@ -19,6 +19,9 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
             
             if (Array.isArray(field.relationTo)) {
               for (let relationTo of field.relationTo) {
+                console.log('handling polymorphic');
+                console.log(collection);
+                console.log(field.relationTo);
                 handlePolymorphicRelationship({
                   incomingConfig: incomingConfig,
                   relationTo: relationTo,
@@ -27,6 +30,9 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
                 });
               }
             } else {
+              console.log('handling simple');
+                console.log(collection);
+                console.log(field.relationTo);
               handleSimpleRelationship({
                 incomingConfig: incomingConfig,
                 relationTo: field['relationTo'],
@@ -110,6 +116,7 @@ const handlePolymorphicRelationship = ({incomingConfig, relationTo, collection, 
   // add the backpopulate hook
   field.hooks.afterChange.push(
     backpopulatePolymorphicHookFactory({
+      primaryCollection: collection,
       targetCollection: targetCollection,
       backpopulatedField: backpopulatedField,
     })
