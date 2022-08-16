@@ -12,9 +12,7 @@ export const backpopulateHookFactory = ({
 }: hookArgs) => {
   const hook: FieldHook = async (args) => {
     const { operation, originalDoc, value } = args;
-    if (!value || !value.length) {
-      return value;
-    }
+    
     if (operation === "create" || operation === "update") {
       const allTargetDocuments = await payload.find({
         collection: targetCollection.slug,
@@ -23,24 +21,24 @@ export const backpopulateHookFactory = ({
       });
 
       for (let targetDocument of allTargetDocuments.docs) {
-        let updatedReferenceIds;
+        let updatedReferenceIds = [];
 
-        if ((value as [string]).includes(targetDocument.id)) {
+        console.log(value);
+        console.log(targetDocument);
+        if (value && (value as [string]).includes(targetDocument.id)) {
           // this is one of the referenced documents, we want to append ourselves to the field, but only once
 
-          const prevReferencedIds = targetDocument[
-            backpopulatedField["name"]
-          ].map((doc) => doc.id);
+          const prevReferencedIds = targetDocument[backpopulatedField["name"]].map(doc => doc.id);
           updatedReferenceIds = Array.from(
             new Set([...prevReferencedIds, originalDoc.id])
           );
         } else {
+          console.log(originalDoc);
+          console.log(targetDocument);
           // this document is not referenced (any more) make sure the originalDoc is not included in the target field
-          const prevReferencedIds = targetDocument[
-            backpopulatedField["name"]
-          ].map((doc) => doc.id);
-          updatedReferenceIds = Array.from(new Set(prevReferencedIds)).filter(
-            (id) => id && id !== originalDoc.id
+          const prevReferencedIds = targetDocument[backpopulatedField["name"]].map(doc => doc.id);
+          updatedReferenceIds = prevReferencedIds.filter(
+            (doc) => doc.id !== originalDoc.id
           );
         }
         await payload.update({
