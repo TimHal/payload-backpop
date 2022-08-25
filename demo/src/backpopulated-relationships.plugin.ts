@@ -86,9 +86,9 @@ const handleSimpleRelationship = ({incomingConfig, relationTo, collection, field
         })
     );
 
-    field.hooks.beforeChange = field.hooks.afterChange.filter(
-        (hook) => hook !== backpopulate
-    );
+    if(!field.hooks.beforeChange){
+        field.hooks.beforeChange = [];
+    }
     field.hooks.beforeChange.push(
         backpopulateBeforeChangeHookFactory({
             targetCollection: targetCollection,
