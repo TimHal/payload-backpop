@@ -64,8 +64,13 @@ export const backpopulateHookFactory = ({
           },
         });
       }
+
     }
-    return value;
+
+    return; //NOT return value; as the new value of that field doesn't change because of this hook anyways!!! Returning value works usually,
+    // but not when the relationTo field is a simple backpopulate thingy but an ARRAY with the length of 1. Due to the previous value
+    // conversion there, we cannot just return value again as the format is for non-array relationTO's now and not for array relationTo#s.
+    // Thus, better to save the pain and just use a simple return;
   };
 
   return hook;
