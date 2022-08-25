@@ -1,6 +1,6 @@
-import { Config } from "payload/config";
-import { Field } from "payload/types";
-import { backpopulateHookFactory } from "./hooks/backpopulate.hook";
+import {Config} from "payload/config";
+import {Field} from "payload/types";
+import {backpopulateHookFactory} from "./hooks/backpopulate.hook";
 import backpopulateCleanupHookFactory from "./hooks/backpopulate-cleanup.hook";
 import backpopulate from "./hooks/backpopulate";
 import backpopulatePolymorphicHookFactory from "./hooks/backpopulate-polymorphic.hook";
@@ -16,7 +16,7 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
                     if (hasMarker) {
                         // get the target collection
                         // @ts-ignore es-lint-disable-line
-                        
+
                         if (Array.isArray(field.relationTo) && field.relationTo.length > 1) {
                             for (let relationTo of field.relationTo) {
                                 console.log('handling polymorphic');
@@ -33,14 +33,14 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
                             console.log('handling simple');
                             console.log(collection);
                             console.log(field.relationTo);
-                            if(Array.isArray(field.relationTo)){ //Still fine, as its length is 1
+                            if (Array.isArray(field.relationTo)) { //Still fine, as its length is 1
                                 handleSimpleRelationship({
                                     incomingConfig: incomingConfig,
                                     relationTo: field['relationTo'][0],
                                     collection: collection,
                                     field: field,
                                 });
-                            }else{
+                            } else {
                                 handleSimpleRelationship({
                                     incomingConfig: incomingConfig,
                                     relationTo: field['relationTo'],
