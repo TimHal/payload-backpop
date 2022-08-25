@@ -36,6 +36,7 @@ export const backpopulateAfterChangeHookFactory = ({ //If value is added or upda
         depth: 1,
       });
       console.log("targetCollection.slug: ", targetCollection.slug)
+      console.log("allTargetDocuments ", allTargetDocuments.docs)
 
       //If the relationTo "value" is an array with length 1: Usually: Value [ '6307772a5aa9f04ab75df7d4' ] with this: [ { relationTo: 'gear-component', value: '6307772a5aa9f04ab75df7d4' } ]
       if(value && value.length >= 1 && value[0].value){
@@ -65,10 +66,18 @@ export const backpopulateAfterChangeHookFactory = ({ //If value is added or upda
           //console.log(originalDoc);
           //console.log(targetDocument);
           // this document is not referenced (any more) make sure the originalDoc is not included in the target field
+          console.warn("Checking other targetDoc for deletion...")
+
           const prevReferencedIds = targetDocument[backpopulatedField["name"]].map(doc => doc.id);
+          console.log("prevReferencedIds: ", prevReferencedIds);
+
           updatedReferenceIds = prevReferencedIds.filter(
-              (doc) => doc.id !== originalDoc.id
+              (doc) => {
+                (doc.id ? doc.id : doc) !== originalDoc.id //Sometimes doc is the id, sometimes doc.id is the id
+              }
           );
+
+          console.log("updatedReferenceIds: ", updatedReferenceIds);
         }
         await payload.update({
           collection: targetCollection.slug,
