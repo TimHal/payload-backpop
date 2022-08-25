@@ -1,6 +1,6 @@
-import {Config} from "payload/config";
-import {Field} from "payload/types";
-import {backpopulateHookFactory} from "./hooks/backpopulate.hook";
+import { Config } from "payload/config";
+import { Field } from "payload/types";
+import { backpopulateAfterChangeHookFactory, backpopulateBeforeChangeHookFactory } from "./hooks/backpopulate.hook";
 import backpopulateCleanupHookFactory from "./hooks/backpopulate-cleanup.hook";
 import backpopulate from "./hooks/backpopulate";
 import backpopulatePolymorphicHookFactory from "./hooks/backpopulate-polymorphic.hook";
@@ -33,14 +33,15 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
                             console.log('handling simple');
                             console.log(collection);
                             console.log(field.relationTo);
-                            if (Array.isArray(field.relationTo)) { //Still fine, as its length is 1
+                            if(Array.isArray(field.relationTo)){ //Still fine, as its length is 1
+                                console.log("Is array: extracted simple relationTo:", field['relationTo'][0])
                                 handleSimpleRelationship({
                                     incomingConfig: incomingConfig,
                                     relationTo: field['relationTo'][0],
                                     collection: collection,
                                     field: field,
                                 });
-                            } else {
+                            }else{
                                 handleSimpleRelationship({
                                     incomingConfig: incomingConfig,
                                     relationTo: field['relationTo'],
@@ -79,11 +80,22 @@ const handleSimpleRelationship = ({incomingConfig, relationTo, collection, field
     );
     // add the backpopulate hook
     field.hooks.afterChange.push(
-        backpopulateHookFactory({
+        backpopulateAfterChangeHookFactory({
             targetCollection: targetCollection,
             backpopulatedField: backpopulatedField,
         })
     );
+
+    field.hooks.beforeChange = field.hooks.afterChange.filter(
+        (hook) => hook !== backpopulate
+    );
+    field.hooks.beforeChange.push(
+        backpopulateBeforeChangeHookFactory({
+            targetCollection: targetCollection,
+            backpopulatedField: backpopulatedField,
+        })
+    );
+    console.log("Field hooks", field.hooks)
 
     // the source collection also needs an afterDeleteHook to remove itself from the backpopulated fields on the target collection
     if (!collection.hasOwnProperty("hooks")) {

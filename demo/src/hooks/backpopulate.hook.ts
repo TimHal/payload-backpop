@@ -2,14 +2,31 @@ import payload from "payload";
 import { Field, FieldHook } from "payload/types";
 import { hookArgs } from "./backpopulate";
 
-export const backpopulateHookFactory = ({
-                                          targetCollection,
-                                          backpopulatedField,
-                                        }: hookArgs) => {
+export const backpopulateBeforeChangeHookFactory = ({ //If value is deleted from relationship?
+                                                      targetCollection,
+                                                      backpopulatedField,
+                                                    }: hookArgs) => {
+  const hook: FieldHook = async (args) => {
+
+    let { operation, originalDoc, value } = args;
+
+    console.log("Before change value", value)
+
+    return;
+  };
+
+  return hook;
+};
+
+export const backpopulateAfterChangeHookFactory = ({ //If value is added or updated from relationship?
+                                                     targetCollection,
+                                                     backpopulatedField,
+                                                   }: hookArgs) => {
   const hook: FieldHook = async (args) => {
     console.log("Running simple hook...")
 
     let { operation, originalDoc, value } = args;
+    console.log("After change value", value)
 
     if (operation === "create" || operation === "update") {
       console.log("Create or update operation...: ", operation)
@@ -34,8 +51,6 @@ export const backpopulateHookFactory = ({
 
       for (let targetDocument of allTargetDocuments.docs) { //all gear-components
         let updatedReferenceIds = [];
-
-        console.log("Value", value);
 
         //console.log(targetDocument);
         if (value && (value as [string]).includes(targetDocument.id)) {
@@ -75,5 +90,3 @@ export const backpopulateHookFactory = ({
 
   return hook;
 };
-
-export default backpopulateHookFactory;

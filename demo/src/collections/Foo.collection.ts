@@ -20,6 +20,7 @@ const Foo: CollectionConfig = {
             hasMany: true,
             hooks: {
                 afterChange: [backpopulate],
+                beforeChange: [backpopulate],
             }
         },
         {
