@@ -1,7 +1,7 @@
 import { Config } from "payload/config";
 import { Field } from "payload/types";
-import { backpopulateAfterChangeHookFactory, backpopulateBeforeChangeHookFactory } from "./hooks/backpopulate.hook";
-import backpopulateCleanupHookFactory from "./hooks/backpopulate-cleanup.hook";
+import { backpopulateAfterChangeHookFactory } from "./hooks/backpopulate.hook";
+import {backpopulateCleanupHookFactory, parentCleanupHookFactory} from "./hooks/backpopulate-cleanup.hook";
 import backpopulate from "./hooks/backpopulate";
 import backpopulatePolymorphicHookFactory from "./hooks/backpopulate-polymorphic.hook";
 
@@ -83,19 +83,11 @@ const handleSimpleRelationship = ({incomingConfig, relationTo, collection, field
         backpopulateAfterChangeHookFactory({
             targetCollection: targetCollection,
             backpopulatedField: backpopulatedField,
+            originalField: field,
         })
     );
 
-    if(!field.hooks.beforeChange){
-        field.hooks.beforeChange = [];
-    }
-    field.hooks.beforeChange.push(
-        backpopulateBeforeChangeHookFactory({
-            targetCollection: targetCollection,
-            backpopulatedField: backpopulatedField,
-        })
-    );
-    console.log("Field hooks", field.hooks)
+
 
     // the source collection also needs an afterDeleteHook to remove itself from the backpopulated fields on the target collection
     if (!collection.hasOwnProperty("hooks")) {
@@ -113,6 +105,25 @@ const handleSimpleRelationship = ({incomingConfig, relationTo, collection, field
             source_field: field.name,
             target_field: backpopulatedField.name,
             target_slug: targetCollection.slug,
+        }),
+    ];
+
+    //Now, handle what happens if the TARGET (collection with the backpopulated field) is deleted
+    if (!targetCollection.hasOwnProperty("hooks")) {
+        targetCollection.hooks = {};
+    }
+    if (!targetCollection.hooks.hasOwnProperty("afterDelete")) {
+        targetCollection.hooks.afterDelete = [];
+    }
+
+    const targetCollectionAfterDeleteHooks = targetCollection.hooks.afterDelete || [];
+
+    targetCollection.hooks.afterDelete = [
+        ...targetCollectionAfterDeleteHooks,
+        parentCleanupHookFactory({
+            source_field: targetFieldName,
+            target_field: field.name,
+            target_slug: collection.slug,
         }),
     ];
 };
