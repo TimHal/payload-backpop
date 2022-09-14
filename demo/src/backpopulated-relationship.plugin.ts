@@ -7,6 +7,7 @@ import {
 } from "./hooks/backpopulate-cleanup.hook";
 import backpopulate from "./hooks/backpopulate";
 import backpopulatePolymorphicHookFactory from "./hooks/backpopulate-polymorphic.hook";
+import { backpopulatePolymorphicCleanupHookFactory } from "./hooks/backpopulate-cleanup-polymorphic.hook";
 
 const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
   for (let collection of incomingConfig.collections) {
@@ -164,7 +165,7 @@ const handlePolymorphicRelationship = ({
 
   collection.hooks.afterDelete = [
     ...collectionAfterDeleteHooks,
-    backpopulateCleanupHookFactory({
+    backpopulatePolymorphicCleanupHookFactory({
       source_field: field.name,
       target_field: backpopulatedField.name,
       target_slug: targetCollection.slug,
