@@ -8,57 +8,96 @@ export const backpopulatePolymorphicHookFactory = ({
   backpopulatedField,
 }: polymorphicHookArgs) => {
   const hook: FieldHook = async (args) => {
-    console.log("Running poly hook...");
-    // TODO: make use of previousDoc here just as in the simple case to improver performance
-    const { operation, originalDoc, value } = args;
-    if (!value || !value.length) {
-      return value;
-    }
+    const { operation, originalDoc, value, previousValue } = args;
+
     if (operation === "create" || operation === "update") {
-      console.log("Create or update operation...");
-      const allTargetDocuments = await payload.find({
-        collection: targetCollection.slug,
-        overrideAccess: true,
-        depth: 1,
-      });
+      if (value === undefined || value === null) {
+        return;
+      }
 
-      for (const targetDocument of allTargetDocuments.docs) {
-        for (const polymorphicEntry of value) {
-          let updatedReferenceIds;
-          if (polymorphicEntry.relationTo !== targetCollection.slug) continue;
+      console.log("Running polymorphic hook");
 
-          if (polymorphicEntry.value === targetDocument.id) {
-            // this is one of the referenced documents, we want to append ourselves to the field, but only once
+      // comparing JSON representation is the easiest approach here
+      const str_value = value.map(JSON.stringify);
+      const str_value_prev = previousValue
+        ? previousValue.map(JSON.stringify)
+        : [];
 
-            const prevReferencedIds = targetDocument[
-              backpopulatedField["name"]
-            ].map((doc) => doc.id);
-            updatedReferenceIds = Array.from(
-              new Set([...prevReferencedIds, originalDoc.id])
+      const removed_targets = [...str_value_prev]
+        .filter((x) => !str_value.includes(x))
+        .map((str) => JSON.parse(str));
+
+      const added_targets = str_value
+        .filter((x) => !str_value_prev.includes(x))
+        .map((str) => JSON.parse(str));
+
+      console.log("added", added_targets);
+      console.log("removed", removed_targets);
+
+      /**
+       * At this point we can update the affected collections.
+       * Thanks to the previousDoc this is much more efficient now.
+       *
+       * At first, aggregate all collections by their slugs of affected data,
+       * later on we streamline the update process for simplicity.
+       */
+
+      const affected_slugs = new Set(
+        [...added_targets, ...removed_targets].map((el) => el.relationTo)
+      );
+
+      // using an extra conversion to array here for compatibility
+      for (const slug of Array.from(affected_slugs)) {
+        // we can now get all affected documents in one go - this increases performance
+        const affected_documents = (
+          await payload.find({
+            collection: slug,
+            overrideAccess: true,
+            depth: 0,
+            limit: 100000,
+            pagination: false,
+            where: {
+              id: {
+                in: [...added_targets, ...removed_targets]
+                  .filter((el) => el.relationTo === slug)
+                  .map((el) => el.value),
+              },
+            },
+          })
+        ).docs;
+
+        // reduce the added_items to their ids, then check against those and remove the document from all other affected_documents
+        // just a minor performance improvement but it saves one extra step
+        const added_target_ids = added_targets
+          .filter((el) => el.relationTo === slug)
+          .map((el) => el.value);
+        for (const affected_document of affected_documents) {
+          const references = affected_document[backpopulatedField["name"]];
+          let updated_references = [];
+          if (added_target_ids.includes(affected_document.id)) {
+            updated_references = Array.from(
+              new Set([...references, originalDoc.id])
             );
           } else {
-            // this document is not referenced (any more) make sure the originalDoc is not included in the target field
-            const prevReferencedIds = targetDocument[
-              backpopulatedField["name"]
-            ].map((doc) => doc.id);
-            updatedReferenceIds = prevReferencedIds.filter(
-              (doc) => doc !== originalDoc._id
+            updated_references = references.filter(
+              (el) => el !== originalDoc.id
             );
           }
+
+          // finally, update the affected document
           await payload.update({
-            collection: targetCollection.slug,
-            id: targetDocument.id,
+            collection: slug,
+            id: affected_document.id,
             overrideAccess: true,
             data: {
-              [backpopulatedField["name"]]: updatedReferenceIds,
+              [backpopulatedField["name"]]: updated_references,
             },
             depth: 0,
           });
         }
       }
     }
-
-    return value;
+    return;
   };
 
   return hook;

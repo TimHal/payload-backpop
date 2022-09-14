@@ -20,10 +20,7 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
             // get the target collection
             // @ts-ignore es-lint-disable-line
 
-            if (
-              Array.isArray(field.relationTo) &&
-              field.relationTo.length > 1
-            ) {
+            if (Array.isArray(field.relationTo)) {
               for (let relationTo of field.relationTo) {
                 console.log("handling polymorphic");
                 console.log(collection);
@@ -36,29 +33,12 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
                 });
               }
             } else {
-              console.log("handling simple");
-              console.log(collection);
-              console.log(field.relationTo);
-              if (Array.isArray(field.relationTo)) {
-                //Still fine, as its length is 1
-                console.log(
-                  "Is array: extracted simple relationTo:",
-                  field["relationTo"][0]
-                );
-                handleSimpleRelationship({
-                  incomingConfig: incomingConfig,
-                  relationTo: field["relationTo"][0],
-                  collection: collection,
-                  field: field,
-                });
-              } else {
-                handleSimpleRelationship({
-                  incomingConfig: incomingConfig,
-                  relationTo: field["relationTo"],
-                  collection: collection,
-                  field: field,
-                });
-              }
+              handleSimpleRelationship({
+                incomingConfig: incomingConfig,
+                relationTo: field["relationTo"],
+                collection: collection,
+                field: field,
+              });
             }
           }
         }
