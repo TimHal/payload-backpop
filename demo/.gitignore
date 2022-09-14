@@ -165,5 +165,8 @@ dist
 
 # exclude demo build
 build/
+deploy/mongo/data
 
+node_modules/
+backpopulate/node_modules/
 # End of https://www.toptal.com/developers/gitignore/api/node,visualstudiocode
