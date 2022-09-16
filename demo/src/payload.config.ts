@@ -6,7 +6,7 @@ import Bar from "./collections/Bar.collection";
 import Baz from "./collections/Baz.collection";
 import BackpopulatedRelationshipsPlugin from "./backpopulated-relationship.plugin";
 
-export default buildConfig({
+const config = {
   serverURL: "http://localhost:3000",
   admin: {
     user: Users.slug,
@@ -19,4 +19,6 @@ export default buildConfig({
     schemaOutputFile: path.resolve(__dirname, "generated-schema.graphql"),
   },
   plugins: [BackpopulatedRelationshipsPlugin],
-});
+};
+export { config };
+export default buildConfig(config);
