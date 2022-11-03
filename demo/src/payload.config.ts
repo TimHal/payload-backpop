@@ -19,6 +19,7 @@ const config = {
     schemaOutputFile: path.resolve(__dirname, "generated-schema.graphql"),
   },
   plugins: [BackpopulatedRelationshipsPlugin],
+
 };
 export { config };
 export default buildConfig(config);
