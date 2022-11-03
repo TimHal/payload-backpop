@@ -1,11 +1,13 @@
 {
   "name": "payload-starter-typescript",
   "description": "Blank template - no collections",
+  
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
     "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "test": "cross-env NODE_ENV=test PAYLOAD_CONFIG_PATH=src/tests/payload-testing.config.ts jest --forceExit --detectOpenHandles",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "npm run copyfiles && npm run build:payload && npm run build:server",
@@ -25,7 +27,8 @@
     "isomorphic-fetch": "^3.0.0",
     "jest": "^29.0.3",
     "mongodb-memory-server": "^8.9.2",
-    "payload": "^1.0.27"
+    "payload": "^1.0.27",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
