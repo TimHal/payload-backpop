@@ -9,6 +9,7 @@ app.get('/', (_, res) => {
   res.redirect('/admin');
 });
 
+console.log(process.env)
 // Initialize Payload
 payload.init({
   secret: process.env.PAYLOAD_SECRET,

@@ -2,6 +2,7 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import payload from "payload";
 import Bar from "../collections/Bar.collection";
+import Foo from "../collections/Foo.collection";
 
 describe("basic tests", () => {
 
@@ -15,29 +16,51 @@ describe("basic tests", () => {
     })
   })
 
-  test("Create", async () => {
-    const prev_bars = await payload.find({
-      collection: Bar.slug,
-      overrideAccess: true,
-      depth: 1,
-    });
+  test("Simple Relationships", async () => {
 
-    console.log(prev_bars.docs);
+    // set up instances of foos and bars 
+    const foo_1 = await payload.create({
+      collection: Foo.slug,
+      data: {name: 'Foo 1'}
+    })
+    const foo_2 = await payload.create({
+      collection: Foo.slug,
+      data: {name: 'Foo 2'}
+    })
 
-    // insert one
-    await payload.create({
+    const bar_1 = await payload.create({
       collection: Bar.slug,
+      data: {name: 'Bar 1'}
+    })
+    const bar_2 = await payload.create({
+      collection: Bar.slug,
+      data: {name: 'Bar 2'}
+    })
+
+    console.log(foo_1)
+    console.log(bar_1)
+    // link foo_1 to bar_1 using the original relationship
+    
+    await payload.update({
+      collection: Foo.slug,
+      id: foo_1.id,
       data: {
-        name: "bar 1",
-      },
-    });
-    const new_bars = await payload.find({
+        bars: [bar_1.id]
+      }
+    })
+
+    expect((await payload.findByID({
+      collection: Foo.slug,
+      id: foo_1
+    })).doc.bars.length).toBe(1)
+    expect((await payload.findByID({
       collection: Bar.slug,
-      overrideAccess: true,
-    });
+      id: bar_1
+    })).doc.foo_bars_backpopulated.length).toBe(1)
+    
 
-    console.log(new_bars.docs);
+    expect(1).toBe(1)
 
-    expect(new_bars.totalDocs).toBe(1);
-  });
+  })
+
 });

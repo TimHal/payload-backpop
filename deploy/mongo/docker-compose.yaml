@@ -4,8 +4,8 @@ services:
   mongodb:
     image: mongo:5.0
     container_name: payload_backpop_demo_mongodb
-    volumes:
-      - backpop_vol1:/data/db
+    # volumes:
+    #   - backpop_vol1:/data/db
     ports:
       - 27017:27017
     environment:
