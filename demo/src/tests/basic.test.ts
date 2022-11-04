@@ -37,10 +37,6 @@ describe("basic tests", () => {
       data: {name: 'Bar 2'}
     })
 
-    console.log(foo_1)
-    console.log(bar_1)
-    // link foo_1 to bar_1 using the original relationship
-    
     await payload.update({
       collection: Foo.slug,
       id: foo_1.id,
@@ -51,12 +47,12 @@ describe("basic tests", () => {
 
     expect((await payload.findByID({
       collection: Foo.slug,
-      id: foo_1
-    })).doc.bars.length).toBe(1)
+      id: foo_1.id
+    })).bars.length).toBe(1)
     expect((await payload.findByID({
       collection: Bar.slug,
-      id: bar_1
-    })).doc.foo_bars_backpopulated.length).toBe(1)
+      id: bar_1.id
+    })).foo_bars_backpopulated.length).toBe(1)
     
 
     expect(1).toBe(1)
