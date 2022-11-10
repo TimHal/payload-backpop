@@ -134,11 +134,14 @@ describe("basic tests", () => {
       data: { name: "Baz 2" },
     });
 
+    console.log(foo_1);
+    console.log(baz_1);
+
     await payload.update({
       collection: Foo.slug,
       id: foo_1.id,
       data: {
-        bars_or_bazzes: [baz_1.id],
+        bars_or_bazzes: [{ [Baz.slug]: baz_1.id }],
       },
     });
 
