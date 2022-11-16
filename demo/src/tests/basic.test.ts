@@ -141,7 +141,7 @@ describe("basic tests", () => {
       collection: Foo.slug,
       id: foo_1.id,
       data: {
-        bars_or_bazzes: [{ [Baz.slug]: baz_1.id }],
+        bars_or_bazzes: [{ value: baz_1.id, relationTo: Baz.slug }],
       },
     });
 
@@ -167,7 +167,10 @@ describe("basic tests", () => {
       collection: Foo.slug,
       id: foo_1.id,
       data: {
-        bars_or_bazzes: [baz_1.id, baz_2.id],
+        bars_or_bazzes: [
+          { value: baz_1.id, relationTo: Baz.slug },
+          { value: baz_2.id, relationTo: Baz.slug },
+        ],
       },
     });
 
