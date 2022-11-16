@@ -9,9 +9,9 @@ services:
     ports:
       - 27017:27017
     environment:
-      MONGO_INITDB_DATABASE: "admin"
-      MONGO_INITDB_ROOT_USERNAME: "root"
-      MONGO_INITDB_ROOT_PASSWORD: "root"
+      - MONGO_INITDB_DATABASE=admin
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
 
 volumes:
   backpop_vol1:
