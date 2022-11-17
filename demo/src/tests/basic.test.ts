@@ -114,7 +114,7 @@ describe("Basic Tests", () => {
     ).toBe(0);
   });
 
-  test("Delete Simple Relationships", async () => {
+  test("Delete Simple Relationships (Source)", async () => {
     // make sure the backpopulated fields are updated correctly when
     // the source element gets deleted
 
@@ -127,13 +127,14 @@ describe("Basic Tests", () => {
       data: { name: "Bar 1" },
     });
 
-    await payload.update({
+    const updated_foo = await payload.update({
       collection: Foo.slug,
       id: foo.id,
       data: {
         bars: [bar.id],
       },
     });
+    console.log(updated_foo);
 
     expect(
       (
@@ -158,6 +159,37 @@ describe("Basic Tests", () => {
         })
       ).foo_bars_backpopulated.length
     ).toBe(0);
+  });
+
+  test("Delete Simple Relationships (Target)", async () => {
+    // given the example collections, we connect a foo with bar and then
+    // delete the secondary (bar) document.
+    const foo_1 = await payload.create({
+      collection: Foo.slug,
+      data: { name: "Foo 1" },
+    });
+
+    const bar_1 = await payload.create({
+      collection: Bar.slug,
+      data: { name: "Bar 1" },
+    });
+
+    await payload.update({
+      collection: Foo.slug,
+      id: foo_1.id,
+      data: {
+        bars: [bar_1.id],
+      },
+    });
+
+    expect(
+      (
+        await payload.findByID({
+          collection: Foo.slug,
+          id: foo_1.id,
+        })
+      ).bars.length
+    ).toBe(1);
   });
 
   test("Polymorphic Relationships", async () => {
@@ -189,9 +221,6 @@ describe("Basic Tests", () => {
       collection: Baz.slug,
       data: { name: "Baz 2" },
     });
-
-    console.log(foo_1);
-    console.log(baz_1);
 
     await payload.update({
       collection: Foo.slug,
