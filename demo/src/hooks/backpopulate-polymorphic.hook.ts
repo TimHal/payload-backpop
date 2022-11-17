@@ -15,8 +15,6 @@ export const backpopulatePolymorphicHookFactory = ({
         return;
       }
 
-      console.log("Running polymorphic hook");
-
       // comparing JSON representation is the easiest approach here
       const str_value = value.map(JSON.stringify);
       const str_value_prev = previousValue
@@ -30,9 +28,6 @@ export const backpopulatePolymorphicHookFactory = ({
       const added_targets = str_value
         .filter((x) => !str_value_prev.includes(x))
         .map((str) => JSON.parse(str));
-
-      console.log("added", added_targets);
-      console.log("removed", removed_targets);
 
       /**
        * At this point we can update the affected collections.

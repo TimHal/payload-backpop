@@ -17,7 +17,6 @@ export const backpopulateAfterChangeHookFactory = ({
         return;
       }
 
-      console.log("Running simple hook");
       //If the relationTo "value" is an array with length 1: Usually: Value [ '6307772a5aa9f04ab75df7d4' ] with this: [ { relationTo: 'gear-component', value: '6307772a5aa9f04ab75df7d4' } ]
 
       const removedTargetIds = previousValue
@@ -26,9 +25,6 @@ export const backpopulateAfterChangeHookFactory = ({
       const addedTargetIds = value.filter(
         (x) => !(previousValue ?? []).includes(x)
       );
-
-      console.log("added", addedTargetIds);
-      console.log("removed", removedTargetIds);
 
       const documentsToRemoveBackPop =
         removedTargetIds.length == 0
@@ -68,10 +64,6 @@ export const backpopulateAfterChangeHookFactory = ({
 
       for (const documentToRemoveBackPop of documentsToRemoveBackPop) {
         // this document is not referenced (any more) make sure the originalDoc is not included in the target field
-        console.log(
-          "Found targetdocument whose backpoulation should be removed",
-          documentToRemoveBackPop.id
-        );
 
         const prevReferencedIds = documentToRemoveBackPop[
           backpopulatedField["name"]

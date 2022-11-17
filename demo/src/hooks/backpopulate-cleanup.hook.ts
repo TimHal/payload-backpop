@@ -16,7 +16,6 @@ export const backpopulateCleanupHookFactory = ({
 }: BackpopulateCleanupHookArgs): AfterDeleteHook => {
   const cleanupHook = async ({ req, id, doc }) => {
     // query all documents which have a relationship to this document
-    console.log("backpopulateCleanupHookFactory hook");
     let value = doc[source_field] ? doc[source_field] : [];
     if (value && value.length >= 1 && value[0].value) {
       let newValue = [];
@@ -25,7 +24,6 @@ export const backpopulateCleanupHookFactory = ({
       }
       value = newValue;
     }
-    console.log("value", value);
 
     for (let targetId of value) {
       const targetDocument = await payload.findByID({
@@ -35,8 +33,6 @@ export const backpopulateCleanupHookFactory = ({
       if (!targetDocument) {
         continue;
       }
-      console.log("Found target document: ", targetDocument);
-
       // get the current backrefs
       const prevReferences = targetDocument[target_field].map((ref) => ref.id);
 
@@ -63,7 +59,6 @@ export const parentCleanupHookFactory = ({
 }: BackpopulateCleanupHookArgs): AfterDeleteHook => {
   const cleanupHook = async ({ req, id, doc }) => {
     // query all documents which have a relationship to this document
-    console.log("backpopulateCleanupHookFactory hook");
     let value = doc[source_field] ? doc[source_field] : [];
     if (value && value.length >= 1 && value[0].value) {
       let newValue = [];
@@ -72,8 +67,6 @@ export const parentCleanupHookFactory = ({
       }
       value = newValue;
     }
-    console.log("value", value);
-    console.log("id", id);
 
     for (let targetId of value) {
       const targetDocument = await payload.findByID({
@@ -83,30 +76,18 @@ export const parentCleanupHookFactory = ({
       if (!targetDocument) {
         continue;
       }
-      console.log(
-        "Found targetDocument[target_field]: ",
-        targetDocument[target_field]
-      );
 
       // get the current backrefs
       const prevReferences = targetDocument[target_field].map((ref) =>
         ref.id ? ref.id : ref.value.id ? ref.value.id : ref.value
       );
 
-      console.log("prevReferences", prevReferences);
-
       let updatedReferenceIds = [];
       updatedReferenceIds = prevReferences.filter((ref) => {
-        console.log("REF", ref.id ? ref.id : ref);
-        console.log("id", id);
-
         return (ref.id ? ref.id : ref) !== id; //Sometimes doc is the id, sometimes doc.id is the id
       });
 
-      console.log("updatedReferenceIds", updatedReferenceIds);
-
       // remove self from backrefs
-      console.log("Target field", target_field);
       await payload.update({
         collection: target_slug,
         id: targetId,
