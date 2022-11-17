@@ -23,9 +23,6 @@ const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
 
             if (Array.isArray(field.relationTo)) {
               for (let relationTo of field.relationTo) {
-                console.log("handling polymorphic");
-                console.log(collection);
-                console.log(field.relationTo);
                 handlePolymorphicRelationship({
                   incomingConfig: incomingConfig,
                   relationTo: relationTo,
