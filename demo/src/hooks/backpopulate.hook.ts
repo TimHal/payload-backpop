@@ -19,6 +19,13 @@ export const backpopulateAfterChangeHookFactory = ({
 
       //If the relationTo "value" is an array with length 1: Usually: Value [ '6307772a5aa9f04ab75df7d4' ] with this: [ { relationTo: 'gear-component', value: '6307772a5aa9f04ab75df7d4' } ]
 
+      if (!Array.isArray(value)) {
+          value = [value];
+      }
+      if (!Array.isArray(previousValue)) {
+          previousValue = [previousValue];
+      }
+      
       const removedTargetIds = previousValue
         ? [...previousValue].filter((x) => !value.includes(x))
         : [];
