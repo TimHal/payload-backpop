@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "moduleResolution": "nodenext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -12,17 +13,23 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "jsx": "react"
+    "jsx": "react",
+    "paths": {
+      "payload/generated-types": [
+        "./src/payload-types.ts",
+      ],
+    }
   },
   "include": [
     "src"
-, "../plugin/hooks/backpopulate.hook.ts", "../plugin/plugin.ts"  ],
+  ],
   "exclude": [
     "node_modules",
     "dist",
     "build",
   ],
   "ts-node": {
-    "transpileOnly": true
+    "transpileOnly": true,
+    "swc": true,
   }
 }
