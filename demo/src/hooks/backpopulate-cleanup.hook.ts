@@ -17,6 +17,11 @@ export const backpopulateCleanupHookFactory = ({
   const cleanupHook = async ({ req, id, doc }) => {
     // query all documents which have a relationship to this document
     let value = doc[source_field] ? doc[source_field] : [];
+    
+     if (!Array.isArray(value)) {
+       value = [value];
+     }
+    
     if (value && value.length >= 1 && value[0].value) {
       let newValue = [];
       for (const valueEntry of value) {
