@@ -1,13 +1,13 @@
 import payload from "payload";
 import { FieldHook } from "payload/types";
-import { hookArgs } from "./backpopulate";
+import { SimpleHookArgs } from "../types";
 
 export const backpopulateAfterChangeHookFactory = ({
   //If value is added or updated from relationship?
   targetCollection,
   backpopulatedField,
   originalField,
-}: hookArgs) => {
+}: SimpleHookArgs) => {
   const hook: FieldHook = async (args) => {
     const { operation, originalDoc, value, previousValue } = args;
 
@@ -23,7 +23,7 @@ export const backpopulateAfterChangeHookFactory = ({
         ? [...previousValue].filter((x) => !value.includes(x))
         : [];
       const addedTargetIds = value.filter(
-        (x) => !(previousValue ?? []).includes(x)
+        (x: unknown) => !(previousValue ?? []).includes(x)
       );
 
       const documentsToRemoveBackPop =

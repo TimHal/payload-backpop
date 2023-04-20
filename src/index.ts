@@ -8,13 +8,14 @@ import {
 import backpopulate from "./hooks/backpopulate";
 import backpopulatePolymorphicHookFactory from "./hooks/backpopulate-polymorphic.hook";
 import { backpopulatePolymorphicCleanupHookFactory } from "./hooks/backpopulate-cleanup-polymorphic.hook";
+import { SimpleRelationshipArgs } from "./types";
 
 const BackpopulatedRelationshipsPlugin = (incomingConfig: Config) => {
-  for (let collection of incomingConfig.collections) {
+  for (let collection of incomingConfig.collections ?? []) {
     for (let field of collection.fields) {
       if (field.type === "relationship" && field.relationTo) {
         if (field.hasOwnProperty("hooks")) {
-          const hasMarker = field.hooks.afterChange.find(
+          const hasMarker = field.hooks?.afterChange?.find(
             (hook) => hook === backpopulate
           );
           if (hasMarker) {
@@ -52,8 +53,8 @@ const handleSimpleRelationship = ({
   relationTo,
   collection,
   field,
-}) => {
-  const targetCollection = incomingConfig.collections.find(
+}: SimpleRelationshipArgs) => {
+  const targetCollection = incomingConfig.collections?.find(
     (collection) => collection.slug === relationTo
   );
   const targetFieldName = `${collection.slug}_${field.name}_backpopulated`;
@@ -63,31 +64,30 @@ const handleSimpleRelationship = ({
     sourceCollectionSlug: collection.slug,
   });
   // prepare the target (backpopulated) collections by adding relationship fields to marked collections.
-  targetCollection.fields.push(backpopulatedField);
+  targetCollection?.fields.push(backpopulatedField);
 
   // replace the marker hook with the actual backpopulation hook
   // remove the marker
-  field.hooks.afterChange = field.hooks.afterChange.filter(
-    (hook) => hook !== backpopulate
-  );
+  if (!field.hooks) field.hooks = { afterChange: [] };
+
+  field.hooks.afterChange =
+    field.hooks.afterChange?.filter((hook) => hook !== backpopulate) ?? [];
   // add the backpopulate hook
-  field.hooks.afterChange.push(
-    backpopulateAfterChangeHookFactory({
-      targetCollection: targetCollection,
-      backpopulatedField: backpopulatedField,
-      originalField: field,
-    })
-  );
+  if (targetCollection) {
+    field.hooks.afterChange.push(
+      backpopulateAfterChangeHookFactory({
+        targetCollection: targetCollection,
+        backpopulatedField: backpopulatedField,
+        originalField: field,
+      })
+    );
+  }
 
   // the source collection also needs an afterDeleteHook to remove itself from the backpopulated fields on the target collection
-  if (!collection.hasOwnProperty("hooks")) {
-    collection.hooks = {};
-  }
-  if (!collection.hooks.hasOwnProperty("afterDelete")) {
-    collection.hooks.afterDelete = [];
-  }
+  collection.hooks ??= {};
+  collection.hooks.afterDelete ??= [];
 
-  const collectionAfterDeleteHooks = collection.hooks.afterDelete || [];
+  const collectionAfterDeleteHooks = collection.hooks?.afterDelete || [];
 
   collection.hooks.afterDelete = [
     ...collectionAfterDeleteHooks,
@@ -151,17 +151,11 @@ const handlePolymorphicRelationship = ({
   );
 
   // the source collection also needs an afterDeleteHook to remove itself from the backpopulated fields on the target collection
-  if (!collection.hasOwnProperty("hooks")) {
-    collection.hooks = {};
-  }
-  if (!collection.hooks.hasOwnProperty("afterDelete")) {
-    collection.hooks.afterDelete = [];
-  }
-
-  const collectionAfterDeleteHooks = collection.hooks.afterDelete || [];
+  collection.hooks ??= {};
+  collection.hooks.afterDelete ??= [];
 
   collection.hooks.afterDelete = [
-    ...collectionAfterDeleteHooks,
+    collection.hooks.afterDelete,
     backpopulatePolymorphicCleanupHookFactory({
       source_field: field.name,
       target_field: backpopulatedField.name,
