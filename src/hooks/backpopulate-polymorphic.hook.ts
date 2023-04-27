@@ -1,12 +1,12 @@
 import payload from "payload";
-import { FieldHook } from "payload/types";
-import { polymorphicHookArgs } from "./backpopulate";
+import { Field, FieldHook } from "payload/types";
+import { PolymorphicHookArgs } from "../types";
 
 export const backpopulatePolymorphicHookFactory = ({
   primaryCollection,
   targetCollection,
   backpopulatedField,
-}: polymorphicHookArgs) => {
+}: PolymorphicHookArgs) => {
   const hook: FieldHook = async (args) => {
     const { operation, originalDoc, value, previousValue } = args;
 
@@ -26,8 +26,8 @@ export const backpopulatePolymorphicHookFactory = ({
         .map((str) => JSON.parse(str));
 
       const added_targets = str_value
-        .filter((x) => !str_value_prev.includes(x))
-        .map((str) => JSON.parse(str));
+        .filter((x: string) => !str_value_prev.includes(x))
+        .map((str: string) => JSON.parse(str));
 
       /**
        * At this point we can update the affected collections.
@@ -64,9 +64,10 @@ export const backpopulatePolymorphicHookFactory = ({
         // reduce the added_items to their ids, then check against those and remove the document from all other affected_documents
         // just a minor performance improvement but it saves one extra step
         const added_target_ids = added_targets
-          .filter((el) => el.relationTo === slug)
-          .map((el) => el.value);
+          .filter((el: any) => el.relationTo === slug)
+          .map((el: any) => el.value);
         for (const affected_document of affected_documents) {
+          affected_document[backpopulatedField["name"]] ??= [];
           const references = affected_document[backpopulatedField["name"]];
           let updated_references = [];
           if (added_target_ids.includes(affected_document.id)) {
@@ -75,7 +76,7 @@ export const backpopulatePolymorphicHookFactory = ({
             );
           } else {
             updated_references = references.filter(
-              (el) => el !== originalDoc.id
+              (el: any) => el !== originalDoc.id
             );
           }
 
