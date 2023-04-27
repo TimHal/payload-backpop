@@ -21,6 +21,7 @@ export default buildConfig({
   collections: [
     {
       slug: fooSlug,
+      timestamps: false,
       fields: [
         {
           name: "name",
@@ -38,6 +39,7 @@ export default buildConfig({
     },
     {
       slug: barSlug,
+      timestamps: false,
       fields: [
         {
           name: "name",

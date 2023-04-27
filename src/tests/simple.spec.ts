@@ -26,8 +26,9 @@ describe("Simple Config Tests", () => {
     handle.close();
   });
 
-  it("Should backpopulate a simple relationship", async () => {
-    const foo = await payload.create({
+  it("Should backpopulate a simple relationship [single add, single delete]", async () => {
+    // Create basic entities
+    let foo = await payload.create({
       collection: fooSlug,
       data: {
         name: "foo",
@@ -35,15 +36,15 @@ describe("Simple Config Tests", () => {
       },
     });
 
-    const bar = await payload.create({
+    let bar = await payload.create({
       collection: barSlug,
       data: {
         name: "bar",
       },
     });
 
-    // now connect foo and bar, bar should backpopulate the relationship
-    await payload.update({
+    // Now connect foo and bar, bar should backpopulate the relationship
+    foo = await payload.update({
       collection: fooSlug,
       id: foo.id,
       data: {
@@ -51,18 +52,33 @@ describe("Simple Config Tests", () => {
       },
     });
 
-    console.log(
-      await payload.findByID({
-        collection: fooSlug,
-        id: foo.id,
-      })
-    );
-    console.log(
-      await payload.findByID({
-        collection: barSlug,
-        id: bar.id,
-      })
-    );
-    expect(1).toBe(1);
+    bar = await payload.findByID({
+      collection: barSlug,
+      id: bar.id,
+    });
+
+    expect(bar).toMatchObject({
+      name: bar.name,
+      foo_bars_backpopulated: [foo],
+    });
+
+    // Remove the bar and check again
+    foo = await payload.update({
+      collection: fooSlug,
+      id: foo.id,
+      data: {
+        bars: [],
+      },
+    });
+
+    bar = await payload.findByID({
+      collection: barSlug,
+      id: bar.id,
+    });
+
+    expect(bar).toMatchObject({
+      name: bar.name,
+      foo_bars_backpopulated: [],
+    });
   });
 });
