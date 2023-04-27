@@ -1,6 +1,10 @@
 import { buildConfig } from "payload/config";
+import * as BackpopulatePlugin from "../../../index";
+import backpopulate from "../../../hooks/backpopulate";
 
-export const simpleCollectionSlug: string = "simpleCollection";
+export const fooSlug: string = "foo";
+export const barSlug: string = "bar";
+export const bazSlug: string = "baz";
 
 /**
  * A simple collection where all translatable fields are top-level.
@@ -13,58 +17,35 @@ export default buildConfig({
 
   debug: true,
   telemetry: false,
-  localization: {
-    locales: ["de", "en", "es"],
-    defaultLocale: "en",
-    fallback: false,
-  },
 
   collections: [
     {
-      slug: simpleCollectionSlug,
+      slug: fooSlug,
       fields: [
         {
-          name: "text",
+          name: "name",
           type: "text",
-          localized: true,
         },
         {
-          name: "richText",
-          type: "richText",
-          localized: true,
-          required: false,
+          name: "bars",
+          type: "relationship",
+          relationTo: barSlug,
+          hooks: {
+            afterChange: [backpopulate],
+          },
         },
-
-        /**
-         * This field should be ignored by the plugin as numbers
-         * can not be translated in a meaningful way
-         */
+      ],
+    },
+    {
+      slug: barSlug,
+      fields: [
         {
-          name: "count",
-          type: "number",
-          localized: true,
-        },
-
-        /**
-         * This thext is not localized and should not be translated
-         */
-        {
-          name: "nonlocalText",
-          type: "text",
-          localized: false,
-        },
-
-        /**
-         * This text is implicitly not localized, it should not
-         * be translated either
-         */
-        {
-          name: "implicitNonlocalText",
+          name: "name",
           type: "text",
         },
       ],
     },
   ],
 
-  plugins: [],
+  plugins: [BackpopulatePlugin.default],
 });
