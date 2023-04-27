@@ -1,6 +1,6 @@
 import { buildConfig } from "payload/config";
-import * as BackpopulatePlugin from "../../../index";
-import backpopulate from "../../../hooks/backpopulate";
+import * as BackpopulatePlugin from "../../index";
+import backpopulate from "../../hooks/backpopulate";
 
 export const fooSlug: string = "foo";
 export const barSlug: string = "bar";
