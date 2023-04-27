@@ -31,7 +31,7 @@ export type PolymorphicHookArgs = {
   // we can not determine if the document is part of the afterchange value
   primaryCollection: CollectionConfig;
   targetCollection: CollectionConfig;
-  backpopulatedField: Field;
+  backpopulatedField: Field & { name: string };
 };
 
 // fields which can be recursively traversed
