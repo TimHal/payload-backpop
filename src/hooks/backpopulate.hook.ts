@@ -22,6 +22,7 @@ export const backpopulateAfterChangeHookFactory = ({
       const removedTargetIds = previousValue
         ? [...previousValue].filter((x) => !value.includes(x))
         : [];
+
       const addedTargetIds = value.filter(
         (x: unknown) => !(previousValue ?? []).includes(x)
       );
@@ -35,7 +36,6 @@ export const backpopulateAfterChangeHookFactory = ({
                 overrideAccess: true,
                 depth: 1,
                 pagination: false,
-                limit: 100000,
                 where: {
                   id: {
                     in: removedTargetIds,
@@ -53,7 +53,6 @@ export const backpopulateAfterChangeHookFactory = ({
                 overrideAccess: true,
                 depth: 1,
                 pagination: false,
-                limit: 100000,
                 where: {
                   id: {
                     in: addedTargetIds,
