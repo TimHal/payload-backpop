@@ -67,9 +67,9 @@ export const backpopulateAfterChangeHookFactory = ({
 
         const prevReferencedIds = documentToRemoveBackPop[
           backpopulatedField["name"]
-        ].map((doc) => doc.id);
+        ].map((doc: any) => doc.id);
 
-        const updatedReferenceIds = prevReferencedIds.filter((doc) => {
+        const updatedReferenceIds = prevReferencedIds.filter((doc: any) => {
           return (doc.id ? doc.id : doc) !== originalDoc.id; //Sometimes doc is the id, sometimes doc.id is the id
         });
 
@@ -84,9 +84,9 @@ export const backpopulateAfterChangeHookFactory = ({
       }
 
       for (const documentToAddBackPop of documentsToAddBackPop) {
-        const prevReferencedIds = documentToAddBackPop[
-          backpopulatedField["name"]
-        ].map((doc) => doc.id);
+        const prevReferencedIds = (
+          documentToAddBackPop[backpopulatedField["name"]] ?? []
+        ).map((doc: any) => doc.id);
         const updatedReferenceIds = Array.from(
           new Set([...prevReferencedIds, originalDoc.id])
         );

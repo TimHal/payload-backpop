@@ -22,8 +22,8 @@ export type PolymorphicRelationshipArgs = {
 
 export type SimpleHookArgs = {
   targetCollection: CollectionConfig;
-  backpopulatedField: Field;
-  originalField: Field;
+  backpopulatedField: Field & { name: string };
+  originalField: Field & { name: string };
 };
 
 export type PolymorphicHookArgs = {
